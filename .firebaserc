@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "ng-weather-cert": {
+      "hosting": {
+        "ng-weather-cert": [
+          "ng-weather-cert"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "ng-weather-cert"
+  }
+}

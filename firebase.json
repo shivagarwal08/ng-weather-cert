@@ -1,0 +1,9 @@
+{
+  "hosting": [
+    {
+      "target": "ng-weather-cert",
+      "source": ".",
+      "frameworksBackend": {}
+    }
+  ]
+}

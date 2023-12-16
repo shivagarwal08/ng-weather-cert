@@ -23,6 +23,7 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
   // create Tab data whenever currentConditionsByZip value changes
   tabItems: Signal<TabItem[]> = computed(() => {
     const currentConditionAndZips: ConditionsAndZip[] = this.currentConditionsByZip();
+    console.log('------computed-->',[...currentConditionAndZips]);
     const tabs: Array<TabItem> = [];
     currentConditionAndZips.forEach((conditionAndZip: ConditionsAndZip) => {
       console.log('-->', conditionAndZip);
@@ -71,9 +72,10 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
       })
   }
 
-  ontabchangeselet(index: number) {
+  onTabSelect(index: number) {
     this.selectedIndex = index;
   }
+  
   removeLocation(tab: TabItem) {
     const zip = (tab.data as any).location.zip;
     this.locationService.removeLocation(zip);

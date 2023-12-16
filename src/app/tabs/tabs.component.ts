@@ -12,7 +12,7 @@ export class TabsComponent implements OnInit, OnChanges {
     @Input() tabs: TabItem[] = [];
     @Output() showForecast = new EventEmitter<TabItem>();
     @Output() remove = new EventEmitter<TabItem>();
-    @Output() tabchangeselet = new EventEmitter<number>();
+    @Output() tabSelected = new EventEmitter<number>();
     @ViewChild(TabHostDirective, { static: true }) tabHost!: TabHostDirective;
     @Input() selected: number = -1;
 
@@ -44,9 +44,12 @@ export class TabsComponent implements OnInit, OnChanges {
         }
     }
     onTabSelect(index: number) {
-        this.tabchangeselet.emit(index);
+        this.tabSelected.emit(index);
     }
     selectTab(index: number) {
+        if (index === -1) {
+            return;
+        }
         console.log('selectTab:', index);
         this.selected = index;
         const tabItem = { ...this.tabs[index] };

@@ -88,6 +88,23 @@
             ],
             "scripts": []
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "version": 2
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "ng-weather-cert:build:production",
+              "serveTarget": "ng-weather-cert:serve:production"
+            },
+            "development": {
+              "buildTarget": "ng-weather-cert:build:development",
+              "serveTarget": "ng-weather-cert:serve:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

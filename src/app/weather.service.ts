@@ -24,12 +24,12 @@ export class WeatherService {
       // update the current conditions from cache storage
       return this.currentConditions.update((conditions) => [...conditions, { zip: zipcode, data: response.currentConditions }]);
     } else {
-      // get the data for Current Conditions and Forecase at the same time for consistency
+      // get the data for Current Conditions and Forecast for consistency of data
       let observableArr = [];
-      let urlForCC = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
+      let url = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
       // add Current Condition API
-      observableArr.push(this.http.get<CurrentConditions>(urlForCC));
-      // add Forecase API
+      observableArr.push(this.http.get<CurrentConditions>(url));
+      // add Forecast API
       observableArr.push(this.fetchForecast(zipcode));
       forkJoin(observableArr).subscribe((dataArr: (CurrentConditions | Forecast)[]) => {
         const data: CurrentConditions = dataArr[0] as CurrentConditions;
@@ -38,6 +38,7 @@ export class WeatherService {
           currentConditions: data,
           forecast: forecast
         }
+        // add the data in the cache storage
         this.cacheService.updateItem(zipcode, response);
         return this.currentConditions.update(conditions => [...conditions, { zip: zipcode, data }]);
       });
@@ -66,12 +67,31 @@ export class WeatherService {
 
   getForecast(zipcode: string): Observable<Forecast | undefined> {
     // Here Forecast data should be present in cache storage as we have already added while saving Current Conditions
-    let data;
+    let dataForecast = undefined;
     if (this.cacheService.isItemPresent(zipcode)) {
       const response: CacheResponseItem = this.cacheService.getItem(zipcode);
-      data = response.forecast;
+      dataForecast = response.forecast;
+    } else {
+      // if not present means data is expired, so we will add both Forecast and CurrentConditions data for consistency
+      let observableArr = [];
+      let url = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
+      // add Current Condition API
+      observableArr.push(this.http.get<CurrentConditions>(url));
+      // add Forecast API
+      observableArr.push(this.fetchForecast(zipcode));
+      forkJoin(observableArr).subscribe((dataArr: (CurrentConditions | Forecast)[]) => {
+        const data: CurrentConditions = dataArr[0] as CurrentConditions;
+        dataForecast = dataArr[1] as Forecast;
+        const response: CacheResponse = {
+          currentConditions: data,
+          forecast: dataForecast
+        }
+        // add the data in the cache storage
+        this.cacheService.updateItem(zipcode, response);
+        this.currentConditions.update(conditions => [...conditions, { zip: zipcode, data }]);
+      })
     }
-    return of(data);
+    return of(dataForecast);
   }
 
   getWeatherIcon(id: number): string {

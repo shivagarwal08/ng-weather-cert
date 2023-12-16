@@ -8,5 +8,4 @@ import { TabItem } from '../tabs/tab-item';
 })
 export class CurrentConditionComponent {
   @Input() data!: any;
-  @Output() showForecast = new EventEmitter<TabItem>();
 }

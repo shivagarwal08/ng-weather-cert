@@ -1,7 +1,7 @@
 <ul class="nav nav-tabs">
     <li *ngFor="let tab of tabs; index as i; trackBy: tabTrackBy" (click)="onTabSelect(i)" class="nav-item">
         <a href="#" [ngClass]="{'nav-link': true, 'active': (selected === i)}">
-            {{tab.data.title}}- {{i}}
+            {{tab.data.title}}
             <span class="close" (click)="removeTab($event, i)">&times;</span>
         </a>
     </li>

@@ -27,7 +27,6 @@ export class LocationService {
   addLocation(zipcode: string) {
     const present = this.locations.find((item: string) => item === zipcode);
     if (present) {
-      console.info('Location Already Present!');
       window.alert('Location Already Present!');
     } else {
       this.locations.push(zipcode);
@@ -42,7 +41,6 @@ export class LocationService {
 
 
   removeLocation(zipcode: string) {
-    console.info('Remove location:', zipcode);
     let index = this.locations.indexOf(zipcode);
     if (index !== -1) {
       this.locations.splice(index, 1);

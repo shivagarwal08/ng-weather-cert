@@ -23,10 +23,8 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
   // create Tab data whenever currentConditionsByZip value changes
   tabItems: Signal<TabItem[]> = computed(() => {
     const currentConditionAndZips: ConditionsAndZip[] = this.currentConditionsByZip();
-    console.log('------computed-->',[...currentConditionAndZips]);
     const tabs: Array<TabItem> = [];
     currentConditionAndZips.forEach((conditionAndZip: ConditionsAndZip) => {
-      console.log('-->', conditionAndZip);
       const id: number = conditionAndZip.data.weather[0].id;
       const imgUrl = this.weatherService.getWeatherIcon(id);
       const data: any = {
@@ -36,7 +34,6 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
       }
       tabs.push(new TabItem(CurrentConditionComponent, data));
     })
-    console.log('---------->..>>>>', tabs);
     this.selectedIndex = tabs.length - 1;
     return tabs;
   })
@@ -75,16 +72,11 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
   onTabSelect(index: number) {
     this.selectedIndex = index;
   }
-  
+
   removeLocation(tab: TabItem) {
     const zip = (tab.data as any).location.zip;
     this.locationService.removeLocation(zip);
     this.weatherService.removeCurrentConditions(zip);
-  }
-
-  showForecast(tab: TabItem) {
-    const zip = (tab.data as any).location.zip;
-    this.router.navigate(['/forecast', zip])
   }
 
   ngOnDestroy() {

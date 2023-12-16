@@ -1,5 +1,5 @@
 <div>
-  <div *ngIf="data.location as location" class="well flex weather-card" (click)="showForecast.emit(location.zip)">
+  <div *ngIf="data.location as location" class="well flex weather-card">
     <div>
       <div>{{location.data?.name}} ({{location?.zip}})</div>
       <h4>Current conditions: {{location.data.weather[0].main}}</h4>

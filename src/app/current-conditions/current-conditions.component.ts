@@ -1,11 +1,9 @@
+import { TabsComponent } from './../tabs/tabs.component';
 import { Component, computed, inject, OnDestroy, OnInit, Signal, ViewChild } from '@angular/core';
-import { Router } from "@angular/router";
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ConditionsAndZip, LocationChange } from './../conditions-and-zip.type';
-import { CurrentConditionComponent } from './../current-condition/current-condition.component';
 import { LocationService } from './../location.service';
-import { TabItem } from './../tabs/tab-item';
 import { WeatherService } from './../weather.service';
 
 @Component({
@@ -16,14 +14,13 @@ import { WeatherService } from './../weather.service';
 export class CurrentConditionsComponent implements OnInit, OnDestroy {
   _unsubscribe$: Subject<void> = new Subject<void>();
   private weatherService = inject(WeatherService);
-  private router = inject(Router);
   protected locationService = inject(LocationService);
   protected currentConditionsByZip: Signal<ConditionsAndZip[]> = this.weatherService.getCurrentConditions();
 
   // create Tab data whenever currentConditionsByZip value changes
-  tabItems: Signal<TabItem[]> = computed(() => {
+  tabItems: Signal<any[]> = computed(() => {
     const currentConditionAndZips: ConditionsAndZip[] = this.currentConditionsByZip();
-    const tabs: Array<TabItem> = [];
+    const tabs: Array<any> = [];
     currentConditionAndZips.forEach((conditionAndZip: ConditionsAndZip) => {
       console.log('-------->', conditionAndZip.zip);
       const id: number = conditionAndZip.data.weather[0].id;
@@ -33,18 +30,20 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
         imgUrl: imgUrl,
         title: `${conditionAndZip.data.name} (${conditionAndZip.zip})`
       }
-      tabs.push(new TabItem(CurrentConditionComponent, data));
+      tabs.push(data);
     })
-    this.selectedIndex = tabs.length - 1;
+    // TODO
+    // this.selectedIndex = tabs.length - 1;
     return tabs;
   })
 
-
-  @ViewChild('weatherCondition') weatherConditionTemplate!: any;
   selectedIndex: number = 0;
+  @ViewChild(TabsComponent) tabsComponent!: any;
+  @ViewChild('personEdit') editPersonTemplate!: any;
 
   constructor() {
   }
+
 
   ngOnInit(): void {
 
@@ -76,15 +75,48 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
       })
   }
 
-  onTabSelect(index: number) {
-    this.selectedIndex = index;
+  /*   onTabSelect(index: number) {
+      this.selectedIndex = index;
+    } */
+  tabTrackBy(index: number, item: any) {    
+    const title = item ? item.title : null;
+    console.log('trackBY', title, item);
+    return title;
   }
 
-  removeLocation(tab: TabItem) {
+  onEditPerson(person: any) {
+    this.tabsComponent.openTab(
+      `Editing ${person.name}`,
+      this.editPersonTemplate,
+      person,
+      true
+    );
+  }
+  onAddPerson() {
+    this.tabsComponent.openTab('New Person', this.editPersonTemplate, {}, true);
+  }
+  onPersonFormSubmit(dataModel: any) {
+    // create a new one
+    dataModel.id = Math.round(Math.random() * 100);
+    // TODO
+    // this.people.push(dataModel);
+    // close the tab
+    this.tabsComponent.closeActiveTab();
+  }
+  openTab(person: any) {
+    this.tabsComponent.openTab(
+      `Editing ${person.name}`,
+      this.editPersonTemplate,
+      person,
+      true
+    );
+  }
+
+  /* removeLocation(tab: TabItem) {
     const zip = (tab.data as any).location.zip;
     this.locationService.removeLocation(zip);
     this.weatherService.removeCurrentConditions(zip);
-  }
+  } */
 
   ngOnDestroy() {
     this._unsubscribe$.next();

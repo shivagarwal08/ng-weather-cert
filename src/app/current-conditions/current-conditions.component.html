@@ -1,4 +1,13 @@
+<button class="btn btn-primary" (click)="openTab({})" >
+    Open tab
+  </button>
 <div>
-  <app-tabs [tabs]="tabItems()" (remove)="removeLocation($event)"
-  (tabSelected)="onTabSelect($event)" [selected]="selectedIndex"></app-tabs>
+  <app-tabs>
+    <app-tab *ngFor="let tab of tabItems(); index as i; trackBy: tabTrackBy" [title]="tab.title">
+      <app-current-condition [data]="tab" (savePerson)="onPersonFormSubmit($event)"></app-current-condition>
+    </app-tab>
+  </app-tabs>
 </div>
+<ng-template let-person="person" #personEdit>
+  <app-current-condition [data]="person" (savePerson)="onPersonFormSubmit($event)"></app-current-condition>
+</ng-template>

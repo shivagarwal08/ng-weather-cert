@@ -1,10 +1,13 @@
 <ul class="nav nav-tabs">
-    <li *ngFor="let tab of tabs; index as i; trackBy: tabTrackBy" (click)="onTabSelect($event, i)" class="nav-item">
-        <a [ngClass]="{'nav-link': true, 'active': (selected === i)}">
-            {{tab.data.title}}
-            <span class="close" (click)="removeTab($event, i)">&times;</span>
+    <li *ngFor="let tab of tabs; index as i; trackBy: tabTrackBy" (click)="selectTab(tab)" [ngClass]="{'nav-item': true, 'active': tab.active}">
+        <a href="#" [ngClass]="{'nav-link': true, 'active': tab.active}">
+            {{tab.title}}
+            <span class="close" (click)="closeTab(tabs)">&times;</span>
         </a>
+    </li>
+    <li *ngFor="let tab of dynamicTabs; index as i; trackBy: tabTrackBy" (click)="selectTab(tab)" [class.active]="tab.active">
+        <a href="#">{{tab.title}} <span class="close" *ngIf="tab.isCloseable" (click)="closeTab(tab)">x</span></a>
     </li>
 </ul>
 <ng-content></ng-content>
-<ng-template tabHost></ng-template>
+<ng-template dynamic-tabs #container></ng-template>

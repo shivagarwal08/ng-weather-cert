@@ -1,5 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TabItem } from '../tabs/tab-item';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-current-condition',

@@ -36,7 +36,9 @@ export class TabsComponent implements OnChanges {
             this.selectTab(this.tabs.length - 1);
         }
     }
-    onTabSelect(index: number) {
+    onTabSelect(event: Event,index: number) {
+        console.log('event', event);
+        event.stopPropagation();
         this.tabSelected.emit(index);
     }
     selectTab(index: number) {

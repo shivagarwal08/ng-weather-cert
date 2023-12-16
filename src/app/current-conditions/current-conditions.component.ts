@@ -25,6 +25,7 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
     const currentConditionAndZips: ConditionsAndZip[] = this.currentConditionsByZip();
     const tabs: Array<TabItem> = [];
     currentConditionAndZips.forEach((conditionAndZip: ConditionsAndZip) => {
+      console.log('-------->', conditionAndZip.zip);
       const id: number = conditionAndZip.data.weather[0].id;
       const imgUrl = this.weatherService.getWeatherIcon(id);
       const data: any = {
@@ -37,6 +38,7 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
     this.selectedIndex = tabs.length - 1;
     return tabs;
   })
+
 
   @ViewChild('weatherCondition') weatherConditionTemplate!: any;
   selectedIndex: number = 0;
@@ -52,16 +54,21 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
         takeUntil(this._unsubscribe$)
       )
       .subscribe((location: LocationChange) => {
+        console.log('----------location:', location);
         if (location) {
           if (location.type === 'ADD' && location.zipcode) {
             // if action is of type 'ADD' fetch the data
+            console.log('----------ADD:', location.zipcode);
             this.weatherService.addCurrentConditions(location.zipcode);
           } else if (location.type === 'REMOVE' && location.zipcode) {
             // if action is of type 'REMOVE' delete the data
+            console.log('----------REMOVE:', location.zipcode);
             this.weatherService.removeCurrentConditions(location.zipcode);
           } else if (location.locations && location.locations.length > 0) {
+            console.log('----------elseif:', location);
             // initial load where locations are from localStorage
             for (let zipcode of location.locations) {
+              console.log('---------sending:', zipcode);
               this.weatherService.addCurrentConditions(zipcode);
             }
           }

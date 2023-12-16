@@ -16,6 +16,22 @@ export class WeatherService {
 
   constructor(private http: HttpClient, private cacheService: CacheResponseService) { }
 
+  getUpdatedSignalValue(prev: ConditionsAndZip[], curr: ConditionsAndZip) {
+    let reduced: ConditionsAndZip[] = [];
+    let matched = false;
+    for (let item of prev) {
+      if (item['zip'] === curr['zip']) {
+        matched = true;
+        item['data'] = curr['data'];
+      }
+      reduced.push(item);
+    }
+    if (!matched) {
+      reduced.push(curr);
+    }
+    return reduced;
+  }
+
   addCurrentConditions(zipcode: string): void {
     // if data is present in cache storage
     if (this.cacheService.isItemPresent(zipcode)) {
@@ -40,7 +56,10 @@ export class WeatherService {
         }
         // add the data in the cache storage
         this.cacheService.updateItem(zipcode, response);
-        return this.currentConditions.update(conditions => [...conditions, { zip: zipcode, data }]);
+        return this.currentConditions.update(conditions => {
+          // can use equals for comparision as well
+          return this.getUpdatedSignalValue([...conditions], { zip: zipcode, data });
+        });
       });
     }
   }
@@ -88,7 +107,9 @@ export class WeatherService {
         }
         // add the data in the cache storage
         this.cacheService.updateItem(zipcode, response);
-        this.currentConditions.update(conditions => [...conditions, { zip: zipcode, data }]);
+        this.currentConditions.update(conditions => {
+          return this.getUpdatedSignalValue([...conditions], { zip: zipcode, data });
+        });
       })
     }
     return of(dataForecast);

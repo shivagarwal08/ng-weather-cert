@@ -16,7 +16,10 @@ export class LocationService {
     let locString = localStorage.getItem(LOCATIONS);
     if (locString) {
       this.locations = JSON.parse(locString);
+    } else {
+      this.locations = [];
     }
+    console.log('ONE TIME====================')
     this.locations$.next({ locations: this.locations });
   }
 
@@ -28,25 +31,27 @@ export class LocationService {
     const present = this.locations.find((item: string) => item === zipcode);
     if (present) {
       window.alert('Location Already Present!');
-    } else {
+    } else if (zipcode && zipcode != '') {
       this.locations.push(zipcode);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
       this.locations$.next({
-        locations: this.locations,
+        locations: [...this.locations],
         zipcode: zipcode,
         type: 'ADD'
       });
+    } else {
+      console.log('------INVALID', zipcode);
     }
   }
 
 
   removeLocation(zipcode: string) {
     let index = this.locations.indexOf(zipcode);
-    if (index !== -1) {
+    if (index > -1) {
       this.locations.splice(index, 1);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
       this.locations$.next({
-        locations: this.locations,
+        locations: [...this.locations],
         zipcode: zipcode,
         type: 'REMOVE'
       });

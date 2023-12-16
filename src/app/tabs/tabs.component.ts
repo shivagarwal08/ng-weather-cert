@@ -23,17 +23,16 @@ export class TabsComponent implements OnInit, OnChanges {
     ngOnInit(): void {
         console.log('ngOnInit:');
     }
-    tabTrackBy(index: number) {
-        console.log('trackby', index);
-        const tabItem = this.tabs ? this.tabs[index] : null;
-        return tabItem ? tabItem.data.title : null;
+    tabTrackBy(index: number, item: TabItem) {
+        const title = item ? item.data.title : null;
+        console.log(title);
+        return title;
     }
 
     createTabs() {
         console.log('createTabs:');
-        if (this.tabs.length > 0) {
+        if (this.tabs && this.tabs.length > 0) {
             console.log(this.tabs.length);
-
             this.selectTab(this.tabs.length - 1);
         }
     }

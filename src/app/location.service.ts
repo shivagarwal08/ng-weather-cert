@@ -1,7 +1,6 @@
-import { Type } from '@angular/core';
-import { LocationChange } from './conditions-and-zip.type';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { LocationChange } from './conditions-and-zip.type';
 
 export const LOCATIONS: string = "locations";
 
@@ -28,7 +27,8 @@ export class LocationService {
   addLocation(zipcode: string) {
     const present = this.locations.find((item: string) => item === zipcode);
     if (present) {
-      console.log('Already Present');
+      console.info('Location Already Present!');
+      window.alert('Location Already Present!');
     } else {
       this.locations.push(zipcode);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
@@ -42,7 +42,7 @@ export class LocationService {
 
 
   removeLocation(zipcode: string) {
-    console.log('locationservice.removeLocation zipcode:', zipcode);
+    console.info('Remove location:', zipcode);
     let index = this.locations.indexOf(zipcode);
     if (index !== -1) {
       this.locations.splice(index, 1);
@@ -52,8 +52,6 @@ export class LocationService {
         zipcode: zipcode,
         type: 'REMOVE'
       });
-    } else {
-      console.log('remove tab not present');
     }
   }
 }

@@ -1,8 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { InjectionToken } from '@angular/core';
 
-import { routes } from './app.routes';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
-};
+export const TIMEOUT_MS: number = 1 * 30 * 1000;
+export const CACHE_TIMEOUT_MS = new InjectionToken('cacheTimeoutMs');

@@ -1,57 +1,85 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
+import { CACHE_TIMEOUT_MS } from './app.config';
+import { CacheResponse, CacheResponseData, CacheResponseItem } from './cache-storage.type';
 
 @Injectable()
 export class CacheResponseService {
-    CACHE_TIMEOUT_MS = 2 * 60 * 1000;
     RESPONSE_CACHE: string = "responseCache";
+    cacheTimeoutMs: number = 0;
 
-    getItem(url: string) {
+    constructor(@Inject(CACHE_TIMEOUT_MS) cacheTimeoutMs: number) {
+        this.cacheTimeoutMs = cacheTimeoutMs;
+    }
+
+    isItemPresent(zipcode: string): boolean {
         let responseCache = this.getResponseCache();
-        if (!responseCache) {
-            console.log('responseCache is not present');
-            return null;
-        }
-        const data = responseCache[url];
-        if (!data) {
-            console.log('data for the location is not present in cache');
-            return null;
-        }
-        let cachedAtMs = data['cachedAtMs'];
-        console.log(cachedAtMs);
+        // if cache not available in storage
+        if (!responseCache) return false;
+        const data: CacheResponseItem = responseCache[zipcode];
+        // data for location is not present
+        if (!data) return false;
+        // if data is expired
+        if (this.checkAndClearExpiredFor(zipcode)) return false;
+        // if data is present return respone as true
+        return true;
+    }
+    getItem(zipcode: string): CacheResponseItem {
+        let responseCache = this.getResponseCache();
+        return responseCache[zipcode];
+    }
+    checkAndClearExpiredFor(zipcode: string) {
+        let responseCache = this.getResponseCache();
         const now = new Date().getTime();
-        if (now > (cachedAtMs + this.CACHE_TIMEOUT_MS)) {
-            console.log('timed out resetting data to null for this location');
-            responseCache[url] = null;
-            this.setResponseCache(responseCache);
-            return null;
-        } else {
-            let response = data['response'];
-            console.log('response', response);
-            return response;
+        let data = responseCache[zipcode];
+        let isExpired = false;
+        if (data) {
+            let cachedAtMs = data['cachedAtMs'];
+            if (now > (cachedAtMs + this.cacheTimeoutMs)) {
+                isExpired = true;
+
+            }
         }
+        if (isExpired) {
+            delete responseCache[zipcode];
+            this.setResponseCache(responseCache);
+        }
+        return isExpired;
+    }
+    clearExpiredData() {
+        let responseCache = this.getResponseCache();
+        const now = new Date().getTime();
+        const zipcodes = Object.keys(responseCache);
+        for (let zipcode of zipcodes) {
+            let data = responseCache[zipcode];
+            if (data) {
+                let cachedAtMs = data['cachedAtMs'];
+                if (now > (cachedAtMs + this.cacheTimeoutMs)) {
+                    delete responseCache[zipcode];
+                }
+            }
+        }
+        this.setResponseCache(responseCache);
     }
 
     getResponseCache() {
         let responseCacheString = localStorage.getItem(this.RESPONSE_CACHE);
-        if (!responseCacheString) {
-            console.log('not presnt');
-            return null;
-        }
+        // response cache not present
+        if (!responseCacheString) return null;
         let responseCache = JSON.parse(responseCacheString);
-        console.log(responseCache);
         return responseCache;
     }
-    setResponseCache(responseCache: any) {
+    setResponseCache(responseCache: CacheResponseData) {
         localStorage.setItem(this.RESPONSE_CACHE, JSON.stringify(responseCache));
     }
-    updateItem(url: string, data: any) {
+    updateItem(zipcode: string, data: CacheResponse) {
         let responseCache = this.getResponseCache();
         if (!responseCache) {
             responseCache = {};
         }
-        responseCache[url] = {};
-        responseCache[url]['response'] = data;
-        responseCache[url]['cachedAtMs'] = new Date().getTime();
+        responseCache[zipcode] = {
+            ...data,
+            cachedAtMs: new Date().getTime()
+        };
         this.setResponseCache(responseCache);
     }
 }

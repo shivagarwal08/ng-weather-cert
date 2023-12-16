@@ -7,5 +7,5 @@ export interface ConditionsAndZip {
 export interface LocationChange {
     locations: Array<string>;
     zipcode?: string;
-    type?: 'ADD' | "REMOVE" | "NONE"
+    type?: 'ADD' | "REMOVE"
 }

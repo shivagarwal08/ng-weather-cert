@@ -1,3 +1,4 @@
 <div>
-  <app-tabs [tabs]="tabItems()" (showForecast)="showForecast($event)" (remove)="removeLocation($event)"></app-tabs>
+  <app-tabs [tabs]="tabItems()" (showForecast)="showForecast($event)" (remove)="removeLocation($event)"
+  (tabchangeselet)="ontabchangeselet($event)" [selected]="selectedIndex"></app-tabs>
 </div>

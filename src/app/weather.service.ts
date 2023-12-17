@@ -65,11 +65,17 @@ export class WeatherService {
   }
 
   removeCurrentConditions(zipcode: string) {
+    console.log('remove', zipcode);
     this.currentConditions.update((conditions: ConditionsAndZip[]) => {
       for (let i in conditions) {
-        if (conditions[i].zip == zipcode)
+        console.log('i', i);
+        if (conditions[i].zip == zipcode) {
+          console.log('splice', i);
           conditions.splice(+i, 1);
+
+        }
       }
+      console.log(conditions);
       return conditions;
     })
   }

@@ -7,8 +7,8 @@ import { Component, Input } from '@angular/core';
 })
 export class TabComponent {
     @Input('title') title!: string;
+    @Input('code') code!: string;
     @Input() active = false;
-    @Input() isCloseable = false;
     @Input() template!: any;
     @Input() dataContext!: any;
 }

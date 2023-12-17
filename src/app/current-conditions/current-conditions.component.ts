@@ -1,3 +1,4 @@
+import { TabData } from './../tab/tab-data.type';
 import { TabsComponent } from './../tabs/tabs.component';
 import { Component, computed, inject, OnDestroy, OnInit, Signal, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -20,33 +21,25 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
   // create Tab data whenever currentConditionsByZip value changes
   tabItems: Signal<any[]> = computed(() => {
     const currentConditionAndZips: ConditionsAndZip[] = this.currentConditionsByZip();
-    const tabs: Array<any> = [];
+    const tabs: Array<TabData> = [];
     currentConditionAndZips.forEach((conditionAndZip: ConditionsAndZip) => {
       console.log('-------->', conditionAndZip.zip);
       const id: number = conditionAndZip.data.weather[0].id;
       const imgUrl = this.weatherService.getWeatherIcon(id);
-      const data: any = {
+      const data = {
         location: conditionAndZip,
         imgUrl: imgUrl,
+        code: conditionAndZip.zip,
         title: `${conditionAndZip.data.name} (${conditionAndZip.zip})`
       }
       tabs.push(data);
     })
-    // TODO
-    // this.selectedIndex = tabs.length - 1;
     return tabs;
   })
 
-  selectedIndex: number = 0;
   @ViewChild(TabsComponent) tabsComponent!: any;
-  @ViewChild('personEdit') editPersonTemplate!: any;
-
-  constructor() {
-  }
-
 
   ngOnInit(): void {
-
     // on location add/remove update the current condition data
     this.locationService.getLocations()
       .pipe(
@@ -75,49 +68,15 @@ export class CurrentConditionsComponent implements OnInit, OnDestroy {
       })
   }
 
-  /*   onTabSelect(index: number) {
-      this.selectedIndex = index;
-    } */
-  tabTrackBy(index: number, item: any) {    
+  tabTrackBy(index: number, item: any) {
     const title = item ? item.title : null;
-    console.log('trackBY', title, item);
+    // console.log('trackBY', title, item);
     return title;
   }
-
-  onEditPerson(person: any) {
-    this.tabsComponent.openTab(
-      `Editing ${person.name}`,
-      this.editPersonTemplate,
-      person,
-      true
-    );
+  onRemoveTab(event: TabData) {
+    console.log('oRemovetab', event.code);
+    this.locationService.removeLocation(event.code);
   }
-  onAddPerson() {
-    this.tabsComponent.openTab('New Person', this.editPersonTemplate, {}, true);
-  }
-  onPersonFormSubmit(dataModel: any) {
-    // create a new one
-    dataModel.id = Math.round(Math.random() * 100);
-    // TODO
-    // this.people.push(dataModel);
-    // close the tab
-    this.tabsComponent.closeActiveTab();
-  }
-  openTab(person: any) {
-    this.tabsComponent.openTab(
-      `Editing ${person.name}`,
-      this.editPersonTemplate,
-      person,
-      true
-    );
-  }
-
-  /* removeLocation(tab: TabItem) {
-    const zip = (tab.data as any).location.zip;
-    this.locationService.removeLocation(zip);
-    this.weatherService.removeCurrentConditions(zip);
-  } */
-
   ngOnDestroy() {
     this._unsubscribe$.next();
     this._unsubscribe$.complete();

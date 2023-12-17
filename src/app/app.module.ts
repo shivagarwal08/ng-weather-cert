@@ -1,5 +1,4 @@
 import { TabComponent } from './tab/tab.component';
-import { DynamicTabsDirective } from './tabs/dynamic-tabs.directive';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from '@angular/core';
@@ -51,8 +50,7 @@ const appRoutes: Routes = [
     CurrentConditionComponent,
     TabsComponent,
     TabComponent,
-    TabHostDirective,
-    DynamicTabsDirective
+    TabHostDirective    
   ],
   providers: [LocationService, WeatherService, CacheResponseService,
     { provide: CACHE_TIMEOUT_MS, useValue: TIMEOUT_MS }],

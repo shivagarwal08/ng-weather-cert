@@ -46,10 +46,14 @@ export class LocationService {
 
 
   removeLocation(zipcode: string) {
+    console.log(zipcode);
     let index = this.locations.indexOf(zipcode);
+    console.log(index);
     if (index > -1) {
       this.locations.splice(index, 1);
+      console.log(this.locations);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
+      console.log('emitee');
       this.locations$.next({
         locations: [...this.locations],
         zipcode: zipcode,

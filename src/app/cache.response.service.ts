@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@angular/core';
 import { CACHE_TIMEOUT_MS } from './app.config';
-import { CacheResponse, CacheResponseData, CacheResponseItem } from './cache-storage.type';
+import { CacheConditionsAndZip, CacheForecast, CacheResponseData, CacheResponseItem } from './cache-storage.type';
+import { ConditionsAndZip } from './conditions-and-zip.type';
+import { Forecast } from './forecasts-list/forecast.type';
 
 @Injectable()
 export class CacheResponseService {
@@ -10,8 +12,38 @@ export class CacheResponseService {
     constructor(@Inject(CACHE_TIMEOUT_MS) cacheTimeoutMs: number) {
         this.cacheTimeoutMs = cacheTimeoutMs;
     }
+    isItemPresent(url: string): boolean {
+        let responseCache = this.getResponseCache();
+        // if cache not available in storage
+        if (!responseCache) return false;
+        const data: CacheResponseItem = responseCache[url];
+        // data for url is not present
+        if (!data) return false;
+        // if data is expired
+        if (this.checkAndClearExpiredFor(url)) return false;
+        // if data is present return respone as true
+        return true;
+    }
+    checkAndClearExpiredFor(url: string) {
+        let responseCache = this.getResponseCache();
+        const now = new Date().getTime();
+        let data = responseCache[url];
+        let isExpired = false;
+        if (data) {
+            let cachedAtMs = data['cachedAtMs'];
+            if (now > (cachedAtMs + this.cacheTimeoutMs)) {
+                isExpired = true;
+            }
+        }
+        if (isExpired) {
+            console.log('cached data expired for: ', url);
+            delete responseCache[url];
+            this.setResponseCache(responseCache);
+        }
+        return isExpired;
+    }
 
-    isItemPresent(zipcode: string): boolean {
+    isItemPresent12(zipcode: string): boolean {
         let responseCache = this.getResponseCache();
         // if cache not available in storage
         if (!responseCache) return false;
@@ -23,11 +55,13 @@ export class CacheResponseService {
         // if data is present return respone as true
         return true;
     }
-    getItem(zipcode: string): CacheResponseItem {
+    getItem(url: string): ConditionsAndZip | Forecast {
         let responseCache = this.getResponseCache();
-        return responseCache[zipcode];
+        let responseWithTime: CacheConditionsAndZip | CacheForecast = responseCache[url];
+        let response: ConditionsAndZip | Forecast = responseWithTime.data;
+        return response;
     }
-    checkAndClearExpiredFor(zipcode: string) {
+    checkAndClearExpiredFor2(zipcode: string) {
         let responseCache = this.getResponseCache();
         const now = new Date().getTime();
         let data = responseCache[zipcode];
@@ -71,14 +105,14 @@ export class CacheResponseService {
     setResponseCache(responseCache: CacheResponseData) {
         localStorage.setItem(this.RESPONSE_CACHE, JSON.stringify(responseCache));
     }
-    updateItem(zipcode: string, data: CacheResponse) {
+    updateItem(url: string, data: (ConditionsAndZip | Forecast)) {
         let responseCache = this.getResponseCache();
         if (!responseCache) {
             responseCache = {};
         }
         // while adding the data, add time also to maintain when the data was added
-        responseCache[zipcode] = {
-            ...data,
+        responseCache[url] = {
+            data: data,
             cachedAtMs: new Date().getTime()
         };
         this.setResponseCache(responseCache);

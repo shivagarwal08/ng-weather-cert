@@ -1,0 +1,6 @@
+<li class="nav-item">
+    <a [ngClass]="{'nav-link': true, 'active': isActive}">
+        {{ Header }}
+        <span class="close" (click)="closeTab()">&times;</span>
+    </a>
+</li>

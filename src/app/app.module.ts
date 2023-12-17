@@ -1,9 +1,9 @@
-import { TabComponent } from './tab/tab.component';
-import { RouterModule, Routes } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { HttpClientModule } from "@angular/common/http";
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -11,11 +11,11 @@ import { CACHE_TIMEOUT_MS, TIMEOUT_MS } from './app.config';
 import { CacheResponseService } from './cache.response.service';
 import { CurrentConditionComponent } from './current-condition/current-condition.component';
 import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
+import { CustomTabsModule } from './custom-tabs/custom-tabs.module';
 import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
 import { LocationService } from "./location.service";
 import { MainPageComponent } from './main-page/main-page.component';
-import { TabHostDirective } from './tabs/tab-host.directive';
-import { TabsComponent } from './tabs/tabs.component';
+import { TabsDemoComponent } from './tabs-demo/tabs-demo.component';
 import { WeatherService } from "./weather.service";
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
 
@@ -34,10 +34,12 @@ const appRoutes: Routes = [
 
 @NgModule({
   imports: [
+    CommonModule,
     BrowserModule,
     FormsModule,
     RouterModule.forRoot(appRoutes),
     HttpClientModule,
+    CustomTabsModule,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
   ],
   declarations: [
@@ -48,9 +50,7 @@ const appRoutes: Routes = [
     CurrentConditionsComponent,
     CurrentConditionsComponent,
     CurrentConditionComponent,
-    TabsComponent,
-    TabComponent,
-    TabHostDirective    
+    TabsDemoComponent
   ],
   providers: [LocationService, WeatherService, CacheResponseService,
     { provide: CACHE_TIMEOUT_MS, useValue: TIMEOUT_MS }],

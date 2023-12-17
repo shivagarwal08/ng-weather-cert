@@ -1,13 +1,2 @@
-<div>
-  <app-tabs (removeTab)="onRemoveTab($event)">
-    <app-tab *ngFor="let tab of tabItems(); index as i; trackBy: tabTrackBy"
-     [title]="tab.title" [code]="tab.code"
-     >
-      <app-current-condition [data]="tab"></app-current-condition>
-    </app-tab>
-  </app-tabs>
-</div>
-<!-- <ng-template let-person="person" #personEdit>
-  <app-current-condition [data]="person"></app-current-condition>
-</ng-template>
- -->
+<app-tab-control>
+</app-tab-control>

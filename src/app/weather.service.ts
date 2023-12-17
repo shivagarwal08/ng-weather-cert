@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Signal, signal } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { forkJoin, Observable, of, Subject, map } from 'rxjs';
 import { CacheResponse, CacheResponseItem } from './cache-storage.type';
 import { CacheResponseService } from './cache.response.service';
 import { ConditionsAndZip } from './conditions-and-zip.type';
@@ -12,113 +12,68 @@ export class WeatherService {
   static URL = 'https://api.openweathermap.org/data/2.5';
   static APPID = '5a4b2d457ecbef9eb2a71e480b947604';
   static ICON_URL = 'https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-hdpi/';
-  private currentConditions = signal<ConditionsAndZip[]>([]);
+  // private currentConditions = signal<ConditionsAndZip[]>([]);
 
+  currentConditions!: ConditionsAndZip;
+  currentConditions$ = new Subject<ConditionsAndZip>();
   constructor(private http: HttpClient, private cacheService: CacheResponseService) { }
 
-  getUpdatedSignalValue(prev: ConditionsAndZip[], curr: ConditionsAndZip) {
-    let reduced: ConditionsAndZip[] = [];
-    let matched = false;
-    for (let item of prev) {
-      if (item['zip'] === curr['zip']) {
-        matched = true;
-        item['data'] = curr['data'];
-      }
-      reduced.push(item);
-    }
-    if (!matched) {
-      reduced.push(curr);
-    }
-    return reduced;
+  getCurrentConditionsData() {
+    return this.currentConditions$.asObservable();
   }
 
-  addCurrentConditions(zipcode: string): void {
-    // if data is present in cache storage
-    if (this.cacheService.isItemPresent(zipcode)) {
-      // get data from cache storage
-      let response: CacheResponseItem = this.cacheService.getItem(zipcode);
-      // update the current conditions from cache storage
-      return this.currentConditions.update((conditions) => [...conditions, { zip: zipcode, data: response.currentConditions }]);
+  fetchCurrentConditions(url: string): Observable<CurrentConditions> {
+    return this.http.get<CurrentConditions>(url);
+  }
+
+  fetchForecast(url: string): Observable<Forecast> {
+    return this.http.get<Forecast>(url);
+  }
+
+  getCurrentConditions(zipcode: string): void {
+    let url = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
+    if (this.cacheService.isItemPresent(url)) {
+      console.log('data is present in cache storage');
+      let data: ConditionsAndZip = this.cacheService.getItem(url) as ConditionsAndZip;
+      this.currentConditions$.next(data);
     } else {
-      // get the data for Current Conditions and Forecast for consistency of data
-      let observableArr = [];
-      let url = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
-      // add Current Condition API
-      observableArr.push(this.http.get<CurrentConditions>(url));
-      // add Forecast API
-      observableArr.push(this.fetchForecast(zipcode));
-      forkJoin(observableArr).subscribe((dataArr: (CurrentConditions | Forecast)[]) => {
-        const data: CurrentConditions = dataArr[0] as CurrentConditions;
-        const forecast: Forecast = dataArr[1] as Forecast;
-        const response: CacheResponse = {
-          currentConditions: data,
-          forecast: forecast
-        }
-        // add the data in the cache storage
-        this.cacheService.updateItem(zipcode, response);
-        return this.currentConditions.update(conditions => {
-          // can use equals for comparision as well
-          return this.getUpdatedSignalValue([...conditions], { zip: zipcode, data });
-        });
-      });
+      console.log('data is not present in cache storage');
+      this.fetchCurrentConditions(url)
+        .pipe(
+          map((response: CurrentConditions) => {
+            const conditionAndZip: ConditionsAndZip = {
+              zip: zipcode,
+              data: response
+            };
+            this.cacheService.updateItem(url, conditionAndZip);
+            return conditionAndZip;
+          })
+        ).subscribe((data: ConditionsAndZip) => {
+          this.currentConditions$.next(data);
+        })
+    }
+  }
+
+  getForecast(zipcode: string): Observable<Forecast> {
+    let url = `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`;
+    if (this.cacheService.isItemPresent(url)) {
+      console.log('data is present in cache storage');
+      let data: Forecast = this.cacheService.getItem(url) as Forecast;
+      return of(data);
+    } else {
+      console.log('data is not present in cache storage');
+      return this.fetchForecast(url)
+        .pipe(
+          map((response: Forecast) => {
+            this.cacheService.updateItem(url, response);
+            return response;
+          })
+        );
     }
   }
 
   removeCurrentConditions(zipcode: string) {
-    console.log('remove', zipcode);
-    this.currentConditions.update((conditions: ConditionsAndZip[]) => {
-      for (let i in conditions) {
-        console.log('i', i);
-        if (conditions[i].zip == zipcode) {
-          console.log('splice', i);
-          conditions.splice(+i, 1);
-
-        }
-      }
-      console.log(conditions);
-      return conditions;
-    })
-  }
-
-  getCurrentConditions(): Signal<ConditionsAndZip[]> {
-    return this.currentConditions.asReadonly();
-  }
-
-  fetchForecast(zipcode: string): Observable<Forecast> {
-    // Here we make a request to get the forecast data from the API. Note the use of backticks and an expression to insert the zipcode
-    let url = `${WeatherService.URL}/forecast/daily?zip=${zipcode},us&units=imperial&cnt=5&APPID=${WeatherService.APPID}`;
-    return this.http.get<Forecast>(url);
-  }
-
-  getForecast(zipcode: string): Observable<Forecast | undefined> {
-    // Here Forecast data should be present in cache storage as we have already added while saving Current Conditions
-    let dataForecast = undefined;
-    if (this.cacheService.isItemPresent(zipcode)) {
-      const response: CacheResponseItem = this.cacheService.getItem(zipcode);
-      dataForecast = response.forecast;
-    } else {
-      // if not present means data is expired, so we will add both Forecast and CurrentConditions data for consistency
-      let observableArr = [];
-      let url = `${WeatherService.URL}/weather?zip=${zipcode},us&units=imperial&APPID=${WeatherService.APPID}`;
-      // add Current Condition API
-      observableArr.push(this.http.get<CurrentConditions>(url));
-      // add Forecast API
-      observableArr.push(this.fetchForecast(zipcode));
-      forkJoin(observableArr).subscribe((dataArr: (CurrentConditions | Forecast)[]) => {
-        const data: CurrentConditions = dataArr[0] as CurrentConditions;
-        dataForecast = dataArr[1] as Forecast;
-        const response: CacheResponse = {
-          currentConditions: data,
-          forecast: dataForecast
-        }
-        // add the data in the cache storage
-        this.cacheService.updateItem(zipcode, response);
-        this.currentConditions.update(conditions => {
-          return this.getUpdatedSignalValue([...conditions], { zip: zipcode, data });
-        });
-      })
-    }
-    return of(dataForecast);
+    console.log('removeCurrentConditions zipcode:', zipcode);
   }
 
   getWeatherIcon(id: number): string {

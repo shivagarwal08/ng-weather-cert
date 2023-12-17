@@ -6,5 +6,6 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./current-condition.component.css']
 })
 export class CurrentConditionComponent {
+  @Input() isActive: boolean = true;
   @Input() data!: any;
 }

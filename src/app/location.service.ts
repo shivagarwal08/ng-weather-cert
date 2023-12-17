@@ -1,3 +1,4 @@
+import { TabService } from './custom-tabs/tab.service';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LocationChange } from './conditions-and-zip.type';
@@ -12,14 +13,13 @@ export class LocationService {
     locations: []
   });
 
-  constructor() {
+  constructor(private tabService: TabService) {
     let locString = localStorage.getItem(LOCATIONS);
     if (locString) {
       this.locations = JSON.parse(locString);
     } else {
       this.locations = [];
     }
-    console.log('ONE TIME====================')
     this.locations$.next({ locations: this.locations });
   }
 
@@ -40,20 +40,17 @@ export class LocationService {
         type: 'ADD'
       });
     } else {
-      console.log('------INVALID', zipcode);
+      window.alert('Plese enter a zipcode');
     }
   }
 
 
   removeLocation(zipcode: string) {
-    console.log(zipcode);
+    console.log('remove location for zip', zipcode);
     let index = this.locations.indexOf(zipcode);
-    console.log(index);
     if (index > -1) {
       this.locations.splice(index, 1);
-      console.log(this.locations);
       localStorage.setItem(LOCATIONS, JSON.stringify(this.locations));
-      console.log('emitee');
       this.locations$.next({
         locations: [...this.locations],
         zipcode: zipcode,

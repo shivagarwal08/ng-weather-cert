@@ -1,0 +1,11 @@
+<section class="tab-items">
+    <ul class="nav nav-tabs">
+        <app-tab-header *ngFor="let item of tabs" [Header]="item.header" [isActive]="item.content.instance.isActive" [uniqueCode]="item.uniqueCode"
+            (Selected)="selectTab($event)" (Close)="closeTab($event)">
+        </app-tab-header>
+    </ul>
+</section>
+
+<section class="tab-content">
+    <ng-container #containerRef></ng-container>
+</section>

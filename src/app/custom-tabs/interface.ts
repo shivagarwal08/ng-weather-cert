@@ -1,11 +1,11 @@
 export class TabDataModel<T> {
-    
+
     constructor() { }
-  
-    selected: T[] = [];
-  
-    select(tab: T) {
-        this.selected.unshift(tab);
+
+    selected: T | undefined = undefined;
+
+    select(tab: T | undefined) {
+        this.selected = tab;
     }
-    
+
 }

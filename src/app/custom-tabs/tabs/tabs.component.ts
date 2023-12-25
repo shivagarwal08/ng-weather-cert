@@ -31,7 +31,12 @@ export class TabsComponent implements AfterContentInit, OnDestroy {
     // if previously tab is selected and now that tab is still present(not removed)
     // then keep the same tab as selected, else make the first tab active
     if (!isPresent) {
-      this.tabService.select(this.tabs.get(0)!);
+      if(this.tabs.length === 0) {
+        this.tabService.select(undefined);
+
+      }else {
+        this.tabService.select(this.tabs.get(0)!);
+      }
     }
   }
 

@@ -8,13 +8,11 @@ export class TabService {
     public readonly selection = new TabDataModel<TabComponent>();
 
     public get selected(): TabComponent | undefined {
-        return this.selection.selected[0];
+        return this.selection.selected;
     }
 
-    public select(tab: TabComponent): void {
-        if (tab) {
-            this.selection.select(tab);
-        }
+    public select(tab: TabComponent|undefined): void {
+        this.selection.select(tab);
     }
 
     isSelected(tab: TabComponent) {

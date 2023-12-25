@@ -6,7 +6,7 @@ import { Forecast } from './forecast.type';
 @Component({
   selector: 'app-forecasts-list',
   templateUrl: './forecasts-list.component.html',
-  styleUrls: ['./forecasts-list.component.css']
+  styleUrls: ['./forecasts-list.component.css'],
 })
 export class ForecastsListComponent {
 

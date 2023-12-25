@@ -1,18 +1,23 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import { TabAddType } from './models/tab.types';
+import { Injectable } from "@angular/core";
+import { TabDataModel } from "./interface";
+import { TabComponent } from "./tab/tab.component";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class TabService {
 
-  tabItemObservable: Subject<TabAddType> = new Subject<TabAddType>();
-  tabRemoveObservable: Subject<string> = new Subject<string>();
+    public readonly selection = new TabDataModel<TabComponent>();
 
-  constructor() { }
+    public get selected(): TabComponent | undefined {
+        return this.selection.selected[0];
+    }
 
-  // addNewTab(code: string) {
-  //   this.tabItemObservable.next(code);
-  // }
+    public select(tab: TabComponent): void {
+        if (tab) {
+            this.selection.select(tab);
+        }
+    }
+
+    isSelected(tab: TabComponent) {
+        return this.selected === tab;
+    }
 }

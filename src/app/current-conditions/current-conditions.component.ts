@@ -1,76 +1,56 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ConditionsAndZip, LocationChange } from './../conditions-and-zip.type';
-import { CurrentConditionComponent } from './../current-condition/current-condition.component';
-import { TabAddType } from './../custom-tabs/models/tab.types';
-import { TabService } from './../custom-tabs/tab.service';
-import { LocationService } from './../location.service';
-import { WeatherService } from './../weather.service';
+import { Component, inject, OnDestroy, OnInit, Signal } from '@angular/core';
+import { Router } from "@angular/router";
+import { Subject, takeUntil } from 'rxjs';
+import { ConditionsAndZip } from '../conditions-and-zip.type';
+import { LocationService } from "../location.service";
+import { WeatherService } from "../weather.service";
 
 @Component({
   selector: 'app-current-conditions',
   templateUrl: './current-conditions.component.html',
-  styleUrls: ['./current-conditions.component.css']
+  styleUrls: ['./current-conditions.component.css'],
 })
-export class CurrentConditionsComponent implements OnInit {
-  private weatherService = inject(WeatherService);
-  protected locationService = inject(LocationService);
-  private tabService = inject(TabService);
+export class CurrentConditionsComponent implements OnInit, OnDestroy {
 
+  public weatherService = inject(WeatherService);
+  private router = inject(Router);
+  protected locationService = inject(LocationService);
+  protected currentConditionsByZip: Signal<ConditionsAndZip[]> = this.weatherService.getCurrentConditions();
   _unsubscribe$: Subject<void> = new Subject<void>();
 
-  ngOnInit(): void {
-    this.weatherService.getCurrentConditionsData()
-      .pipe(
-        takeUntil(this._unsubscribe$)
-      )
-      .subscribe((conditionAndZip: ConditionsAndZip) => {
-        console.log('Creating tab for data:', conditionAndZip);
-        let addData: TabAddType = {
-          code: `${conditionAndZip.data.name} (${conditionAndZip.zip})`,
-          type: CurrentConditionComponent,
-          data: {
-            ...conditionAndZip,
-            imgUrl: this.weatherService.getWeatherIcon(conditionAndZip.data.weather[0].id)
-          }
-        }
-        this.tabService.tabItemObservable.next(addData);
-      });
-
-    this.locationService.getLocations()
-      .pipe(
-        takeUntil(this._unsubscribe$)
-      )
-      .subscribe((location: LocationChange) => {
-        console.log('locations:', location);
-        if (location) {
-          if (location.type === 'ADD' && location.zipcode) {
-            this.weatherService.getCurrentConditions(location.zipcode);
-          } else if (location.type === 'REMOVE' && location.zipcode) {
-            this.weatherService.removeCurrentConditions(location.zipcode);
-          } else if (location.locations && location.locations.length > 0) {
-            for (let zipcode of location.locations) {
-              this.weatherService.getCurrentConditions(zipcode);
-            }
-          }
-        }
-      })
-
-    this.tabService.tabRemoveObservable
-      .pipe(
-        takeUntil(this._unsubscribe$)
-      )
-      .subscribe({
-        next: (zipcode: string) => {
-          this.locationService.removeLocation(zipcode);
-        },
-        error: (err: any) => {
-          console.log('error:', err);
-        }
-      });
+  showForecast(zipcode: string) {
+    this.router.navigate(['/forecast', zipcode])
   }
 
+  ngOnInit(): void {
+    // if a new location is added then add current conditions in weather service
+    this.locationService.getAddLocation()
+      .pipe(
+        takeUntil(this._unsubscribe$)
+      )
+      .subscribe((zipcode: string) => {
+        this.weatherService.addCurrentConditions(zipcode);
+      });
+
+    // if a location is remove then remove the current conditions in weather service
+    this.locationService.getRemoveLocation()
+      .pipe(
+        takeUntil(this._unsubscribe$)
+      )
+      .subscribe((zipcode: string) => {
+        this.weatherService.removeCurrentConditions(zipcode);
+      });
+
+    const locations = this.locationService.getLocations();
+    const locationLoaded = this.locationService.getLocationLoaded();
+    // update flag as we are adding these locations into WeatherService and we don't want to add again
+    this.locationService.setLocationLoaded(true);
+    if (!locationLoaded && locations && locations.length > 0) {
+      for (let zipcode of locations) {
+        this.weatherService.addCurrentConditions(zipcode);
+      }
+    }
+  }
   ngOnDestroy() {
     this._unsubscribe$.next();
     this._unsubscribe$.complete();

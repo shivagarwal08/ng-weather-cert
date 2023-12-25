@@ -9,13 +9,11 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { CACHE_TIMEOUT_MS, TIMEOUT_MS } from './app.config';
 import { CacheResponseService } from './cache.response.service';
-import { CurrentConditionComponent } from './current-condition/current-condition.component';
 import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
 import { CustomTabsModule } from './custom-tabs/custom-tabs.module';
 import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
 import { LocationService } from "./location.service";
 import { MainPageComponent } from './main-page/main-page.component';
-import { TabsDemoComponent } from './tabs-demo/tabs-demo.component';
 import { WeatherService } from "./weather.service";
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
 
@@ -48,9 +46,6 @@ const appRoutes: Routes = [
     MainPageComponent,
     ForecastsListComponent,
     CurrentConditionsComponent,
-    CurrentConditionsComponent,
-    CurrentConditionComponent,
-    TabsDemoComponent
   ],
   providers: [LocationService, WeatherService, CacheResponseService,
     { provide: CACHE_TIMEOUT_MS, useValue: TIMEOUT_MS }],

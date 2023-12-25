@@ -42,42 +42,11 @@ export class CacheResponseService {
         }
         return isExpired;
     }
-
-    isItemPresent12(zipcode: string): boolean {
-        let responseCache = this.getResponseCache();
-        // if cache not available in storage
-        if (!responseCache) return false;
-        const data: CacheResponseItem = responseCache[zipcode];
-        // data for location is not present
-        if (!data) return false;
-        // if data is expired
-        if (this.checkAndClearExpiredFor(zipcode)) return false;
-        // if data is present return respone as true
-        return true;
-    }
     getItem(url: string): ConditionsAndZip | Forecast {
         let responseCache = this.getResponseCache();
         let responseWithTime: CacheConditionsAndZip | CacheForecast = responseCache[url];
         let response: ConditionsAndZip | Forecast = responseWithTime.data;
         return response;
-    }
-    checkAndClearExpiredFor2(zipcode: string) {
-        let responseCache = this.getResponseCache();
-        const now = new Date().getTime();
-        let data = responseCache[zipcode];
-        let isExpired = false;
-        if (data) {
-            let cachedAtMs = data['cachedAtMs'];
-            if (now > (cachedAtMs + this.cacheTimeoutMs)) {
-                isExpired = true;
-
-            }
-        }
-        if (isExpired) {
-            delete responseCache[zipcode];
-            this.setResponseCache(responseCache);
-        }
-        return isExpired;
     }
     clearExpiredData() {
         let responseCache = this.getResponseCache();

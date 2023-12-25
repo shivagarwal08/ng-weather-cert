@@ -1,0 +1,15 @@
+<div class="tabs-container">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let tab of tabs" (click)="tabService.select(tab)">
+            <a class="nav-link" [ngClass]="{'active': tabService.isSelected(tab)}">
+                <ng-container [ngTemplateOutlet]="tab.header"></ng-container>
+            </a>
+        </li>
+    </ul>
+    <div class="content">
+        <ng-template #noTemplate>
+            <h5>This is default tab content when no template is available</h5>
+        </ng-template>
+        <ng-container [ngTemplateOutlet]="tabService.selected?.content || noTemplate"></ng-container>
+    </div>
+</div>

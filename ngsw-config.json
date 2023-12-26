@@ -1,6 +1,7 @@
 {
-    "index": "/index.html",
-    "assetGroups": [{
+  "index": "/index.html",
+  "assetGroups": [
+    {
       "name": "app",
       "installMode": "prefetch",
       "resources": {
@@ -11,7 +12,8 @@
           "/*.js"
         ]
       }
-    }, {
+    },
+    {
       "name": "assets",
       "installMode": "lazy",
       "updateMode": "prefetch",
@@ -20,15 +22,18 @@
           "/assets/**"
         ]
       }
-    }],
-    "dataGroups": [{
-        "name": "WeatherAPI",
-        "urls": [
-          "https://api.openweathermap.org/data/**"
-        ],
-        "cacheConfig": {
-          "maxAge": "6h",
-          "strategy": "freshness"
-        }
-      }]
-  }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "WeatherAPI",
+      "urls": [
+        "https://api.openweathermap.org/data/**"
+      ],
+      "cacheConfig": {
+        "maxAge": "2h",
+        "strategy": "performance"
+      }
+    }
+  ]
+}
